@@ -1,6 +1,7 @@
 <template>
   <div class="Scene">
-    x: <input type="number" v-model="sphere.position.x" /> visible:
+    x:
+    <input type="number" v-model="sphere.position.x" /> visible:
     <input type="checkbox" v-model="sphere.visible" />
 
     <canvas
@@ -23,18 +24,18 @@ import {
   Vector3,
   HemisphericLight,
   PointLight
-} from '@babylonjs/core'
+} from "@babylonjs/core";
 
-import Sphere from '@/components/Sphere'
+import Sphere from "@/components/Sphere";
 
 export default {
-  name: 'Scene',
+  name: "Scene",
   components: { Sphere },
 
   provide() {
     return {
       babylon: this.babylon
-    }
+    };
   },
 
   data() {
@@ -53,19 +54,19 @@ export default {
           z: 0
         }
       }
-    }
+    };
   },
 
   mounted() {
-    this.createScene()
+    this.createScene();
 
-    this.babylon.sceneReady = true
-    this.babylon.canvas = this.$refs.canvas
+    this.babylon.sceneReady = true;
+    this.babylon.canvas = this.$refs.canvas;
   },
 
-  beforeDestroy() {
-    this.babylon.scene.dispose()
-    this.engine.dispose()
+  beforeUnmount() {
+    this.babylon.scene.dispose();
+    this.engine.dispose();
   },
 
   methods: {
@@ -76,33 +77,33 @@ export default {
         true,
         { preserveDrawingBuffer: true },
         false
-      )
+      );
 
-      this.babylon.scene = new Scene(this.engine)
+      this.babylon.scene = new Scene(this.engine);
 
       var camera = new ArcRotateCamera(
-        'Camera',
+        "Camera",
         Math.PI / 2,
         Math.PI / 2,
         2,
         Vector3.Zero(),
         this.babylon.scene
-      )
-      camera.attachControl(this.$refs.canvas, true)
+      );
+      camera.attachControl(this.$refs.canvas, true);
 
-      new HemisphericLight('light1', new Vector3(1, 1, 0), this.babylon.scene)
-      new PointLight('light2', new Vector3(0, 1, -1), this.babylon.scene)
+      new HemisphericLight("light1", new Vector3(1, 1, 0), this.babylon.scene);
+      new PointLight("light2", new Vector3(0, 1, -1), this.babylon.scene);
 
       this.engine.runRenderLoop(() => {
-        this.babylon.scene.render()
-      })
+        this.babylon.scene.render();
+      });
     },
 
     layout() {
-      if (this.engine) this.engine.resize()
+      if (this.engine) this.engine.resize();
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
