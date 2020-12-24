@@ -1,18 +1,40 @@
 <template>
   <div class="Scene">
-    x:
-    <input type="number" v-model="sphere.position.x" /> visible:
-    <input type="checkbox" v-model="sphere.visible" />
-
-    <canvas
-      id="renderCanvas"
-      ref="canvas"
-      class="Scene-canvas"
-      touch-action="none"
-      oncontextmenu="return false"
-    ></canvas>
-
-    <Sphere v-if="sphere.visible" :value="sphere" />
+    <div class="front">
+      <div class="buttons">
+        <ul>
+          <li>
+            <div class="visible">
+              visible:
+              <input type="checkbox" v-model="sphere.visible" />
+            </div>
+          </li>
+          <li>
+            x:
+            <input type="number" v-model="sphere.position.x" />
+          </li>
+          <li>
+            y:
+            <input type="number" v-model="sphere.position.y" />
+          </li>
+          <li>
+            z:
+            <input type="number" v-model="sphere.position.z" />
+          </li>
+        </ul>
+      </div>
+      <Sphere v-if="sphere.visible" :value="sphere" />
+      <Ground v-if="ground.visible" :value="ground" />
+    </div>
+    <div class="back">
+      <canvas
+        id="renderCanvas"
+        ref="canvas"
+        class="Scene-canvas"
+        touch-action="none"
+        oncontextmenu="return false"
+      ></canvas>
+    </div>
   </div>
 </template>
 
@@ -27,10 +49,11 @@ import {
 } from "@babylonjs/core";
 
 import Sphere from "@/components/Sphere";
+import Ground from "@/components/Ground";
 
 export default {
   name: "Scene",
-  components: { Sphere },
+  components: { Sphere, Ground },
 
   provide() {
     return {
@@ -47,6 +70,14 @@ export default {
       },
 
       sphere: {
+        visible: true,
+        position: {
+          x: 0,
+          y: 0,
+          z: 0
+        }
+      },
+      ground: {
         visible: true,
         position: {
           x: 0,
@@ -108,11 +139,36 @@ export default {
 
 <style lang="scss">
 .Scene {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
+  .front {
+    position: absolute;
+    z-index: 1;
+    color: white;
+    height: 100%;
+    width: 100%;
+    display: flex;
 
+    .buttons {
+      ul {
+        list-style-type: none;
+        padding: 0px;
+        margin: 0.5rem;
+        li {
+          padding: 0.5rem;
+          text-decoration: none;
+        }
+      }
+
+      margin-top: auto;
+      margin-left: auto;
+    }
+  }
+  .back {
+    z-index: -99;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+}
 .Scene-canvas {
   width: 100%;
   height: 100%;
