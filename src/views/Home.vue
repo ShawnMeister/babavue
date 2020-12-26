@@ -5,7 +5,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import Scene from "@/components/Scene.vue";
 
 export default {

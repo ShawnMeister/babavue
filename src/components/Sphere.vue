@@ -8,6 +8,11 @@ import position from "@/components/mixins/position";
 export default {
   name: "Sphere",
   mixins: [entity, position],
+  data: function() {
+    return {
+      events: []
+    };
+  },
 
   methods: {
     addToScene() {
@@ -17,6 +22,8 @@ export default {
         0.5,
         this.babylon.scene
       );
+
+      this.sceneElement.position.y = 1;
 
       var material = new PBRMaterial("pbr", this.babylon.scene);
       material.albedoColor = new Color3(1.0, 0.766, 0.336);

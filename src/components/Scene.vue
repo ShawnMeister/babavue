@@ -18,13 +18,21 @@
             <input type="number" v-model="sphere.position.y" />
           </li>
           <li>
+            KeyPressed
+            <input
+              type="text"
+              @keydown.stop.prevent="keyEvent($event)"
+              @keyup.stop.prevent="keyEvent($event)"
+              @keypress.stop.prevent="keyEvent($event)"
+            />
+          </li>
+          <li>
             z:
             <input type="number" v-model="sphere.position.z" />
           </li>
         </ul>
       </div>
       <Sphere v-if="sphere.visible" :value="sphere" />
-      <Ground v-if="ground.visible" :value="ground" />
     </div>
     <div class="back">
       <canvas
@@ -33,28 +41,37 @@
         class="Scene-canvas"
         touch-action="none"
         oncontextmenu="return false"
-      ></canvas>
+      />
     </div>
   </div>
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
 import {
   Engine,
   Scene,
   ArcRotateCamera,
+  Vector2,
   Vector3,
   HemisphericLight,
-  PointLight
+  PointLight,
+  MeshBuilder,
+  Mesh,
+  PBRMaterial,
+  FreeCamera,
+  Color3
 } from "@babylonjs/core";
 
+import "@babylonjs/core/Meshes/meshBuilder";
+import _ from "underscore";
 import Sphere from "@/components/Sphere";
-import Ground from "@/components/Ground";
 
 export default {
   name: "Scene",
-  components: { Sphere, Ground },
-
+  components: {
+    Sphere
+  },
   provide() {
     return {
       babylon: this.babylon
@@ -63,6 +80,7 @@ export default {
 
   data() {
     return {
+      events: [],
       babylon: {
         scene: undefined,
         sceneReady: false,
@@ -73,15 +91,7 @@ export default {
         visible: true,
         position: {
           x: 0,
-          y: 0,
-          z: 0
-        }
-      },
-      ground: {
-        visible: true,
-        position: {
-          x: 0,
-          y: 0,
+          y: 5,
           z: 0
         }
       }
@@ -90,7 +100,6 @@ export default {
 
   mounted() {
     this.createScene();
-
     this.babylon.sceneReady = true;
     this.babylon.canvas = this.$refs.canvas;
   },
@@ -101,6 +110,37 @@ export default {
   },
 
   methods: {
+    keyEvent(event) {
+      console.log("Key pressed:", event.key);
+      this.events.unshift({
+        type: event.type,
+        details: _.pick(
+          event,
+          "charCode",
+          "code",
+          "detail",
+          "key",
+          "keyCode",
+          "keyIdentifier",
+          "keyLocation",
+          "location",
+          "repeat",
+          "which"
+        ),
+        propagation: _.pick(
+          event,
+          "bubbles",
+          "cancelBubble",
+          "cancelable",
+          "defaultPrevented",
+          "eventPhase",
+          "isTrusted",
+          "returnValue",
+          "timeStamp"
+        ),
+        modifiers: _.pick(event, "altKey", "ctrlKey", "metaKey", "shiftKey")
+      });
+    },
     createScene() {
       // Create render loop, a camera and some basic lights:
       this.engine = new Engine(
@@ -112,18 +152,24 @@ export default {
 
       this.babylon.scene = new Scene(this.engine);
 
-      var camera = new ArcRotateCamera(
+      var camera = new FreeCamera(
         "Camera",
-        Math.PI / 2,
-        Math.PI / 2,
-        2,
-        Vector3.Zero(),
+        new Vector3(0, 15, -30),
         this.babylon.scene
       );
       camera.attachControl(this.$refs.canvas, true);
+      camera.cameraRotation = new Vector2(0.05, 0.0);
 
       new HemisphericLight("light1", new Vector3(1, 1, 0), this.babylon.scene);
       new PointLight("light2", new Vector3(0, 1, -1), this.babylon.scene);
+
+      this.sceneElement = new Mesh.CreateGround(
+        "ground",
+        20,
+        20,
+        20,
+        this.babylon.scene
+      );
 
       this.engine.runRenderLoop(() => {
         this.babylon.scene.render();
