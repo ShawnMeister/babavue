@@ -18,13 +18,8 @@
             <input type="number" v-model="sphere.position.y" />
           </li>
           <li>
-            KeyPressed
-            <input
-              type="text"
-              @keydown.stop.prevent="keyEvent($event)"
-              @keyup.stop.prevent="keyEvent($event)"
-              @keypress.stop.prevent="keyEvent($event)"
-            />
+            KeyPressed:
+            {{ currentKey }}
           </li>
           <li>
             z:
@@ -60,7 +55,9 @@ import {
   Mesh,
   PBRMaterial,
   FreeCamera,
-  Color3
+  Color3,
+  KeyboardEventTypes,
+  PointerEventTypes
 } from "@babylonjs/core";
 
 import "@babylonjs/core/Meshes/meshBuilder";
@@ -80,6 +77,7 @@ export default {
 
   data() {
     return {
+      currentKey: null,
       events: [],
       babylon: {
         scene: undefined,
@@ -91,7 +89,7 @@ export default {
         visible: true,
         position: {
           x: 0,
-          y: 5,
+          y: 2,
           z: 0
         }
       }
@@ -110,37 +108,6 @@ export default {
   },
 
   methods: {
-    keyEvent(event) {
-      console.log("Key pressed:", event.key);
-      this.events.unshift({
-        type: event.type,
-        details: _.pick(
-          event,
-          "charCode",
-          "code",
-          "detail",
-          "key",
-          "keyCode",
-          "keyIdentifier",
-          "keyLocation",
-          "location",
-          "repeat",
-          "which"
-        ),
-        propagation: _.pick(
-          event,
-          "bubbles",
-          "cancelBubble",
-          "cancelable",
-          "defaultPrevented",
-          "eventPhase",
-          "isTrusted",
-          "returnValue",
-          "timeStamp"
-        ),
-        modifiers: _.pick(event, "altKey", "ctrlKey", "metaKey", "shiftKey")
-      });
-    },
     createScene() {
       // Create render loop, a camera and some basic lights:
       this.engine = new Engine(
@@ -157,7 +124,7 @@ export default {
         new Vector3(0, 15, -30),
         this.babylon.scene
       );
-      camera.attachControl(this.$refs.canvas, true);
+      // camera.attachControl(this.$refs.canvas, true);
       camera.cameraRotation = new Vector2(0.05, 0.0);
 
       new HemisphericLight("light1", new Vector3(1, 1, 0), this.babylon.scene);
@@ -170,6 +137,60 @@ export default {
         20,
         this.babylon.scene
       );
+
+      this.babylon.scene.onPointerObservable.add(pointerInfo => {
+        switch (pointerInfo.type) {
+          case PointerEventTypes.POINTERDOWN:
+            console.log("POINTER DOWN");
+
+            break;
+          case PointerEventTypes.POINTERUP:
+            console.log("POINTER UP");
+            break;
+          case PointerEventTypes.POINTERMOVE:
+            console.log("POINTER MOVE");
+            break;
+          case PointerEventTypes.POINTERWHEEL:
+            console.log("POINTER WHEEL");
+            break;
+          case PointerEventTypes.POINTERPICK:
+            console.log("POINTER PICK");
+            break;
+          case PointerEventTypes.POINTERTAP:
+            console.log("POINTER TAP");
+            break;
+          case PointerEventTypes.POINTERDOUBLETAP:
+            console.log("POINTER DOUBLE-TAP");
+            break;
+        }
+      });
+
+      this.babylon.scene.onKeyboardObservable.add(kbInfo => {
+        switch (kbInfo.type) {
+          case KeyboardEventTypes.KEYDOWN:
+            // console.log("KEY DOWN: ", kbInfo.event.key);
+            this.currentKey = kbInfo.event.key;
+            switch (kbInfo.event.key) {
+              case "ArrowUp":
+                // alert("ye dawg");
+                this.sphere.position.z++;
+                break;
+              case "ArrowDown":
+                this.sphere.position.z--;
+                break;
+              case "ArrowLeft":
+                this.sphere.position.x--;
+                break;
+              case "ArrowRight":
+                this.sphere.position.x++;
+                break;
+            }
+            break;
+          case KeyboardEventTypes.KEYUP:
+            console.log("KEY UP: ", kbInfo.event.keyCode);
+            break;
+        }
+      });
 
       this.engine.runRenderLoop(() => {
         this.babylon.scene.render();
@@ -189,18 +210,22 @@ export default {
     position: absolute;
     z-index: 1;
     color: white;
-    height: 100%;
-    width: 100%;
+    height: fit-content;
+    width: fit-content;
+    bottom: 0px;
+    right: 0px;
     display: flex;
 
     .buttons {
       ul {
         list-style-type: none;
         padding: 0px;
-        margin: 0.5rem;
+        margin: 1rem 0.5rem;
         li {
           padding: 0.5rem;
           text-decoration: none;
+          text-align: left;
+          width: 250px;
         }
       }
 
